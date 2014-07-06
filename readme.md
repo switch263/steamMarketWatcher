@@ -1,7 +1,7 @@
 Steam Market Watcher
 - - - - -  - - - - - 
 
-Steam Market Watcher is a little Python script that allows you to check at constant intervals over items you're looking for. It lets you enter a price, and whenever one of your items meets the requirement, it alerts you.
+Steam Market Watcher is a little Python script that allows you to check at constant intervals over items you're looking for in the Steam Community Market. It lets you enter a price, and whenever one of your items meets the requirement, it alerts you.
 
 Usage:
 
