@@ -5,7 +5,7 @@ Steam Market Watcher is a little Python script that allows you to check at const
 
 Usage :
 
-    python ./marketWatcher --help | -f path | item_name price [-e]
+    python ./marketWatcher --help | [-f path | item_name price] [-e]
 
         --help : displays this message.
         -f : reads the input into the file at path.
