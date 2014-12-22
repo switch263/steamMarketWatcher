@@ -4,10 +4,13 @@ import urllib2
 from time import sleep
 from HTMLParser import HTMLParser
 
-TIME_INTERVAL = 0
+TIME_INTERVAL   = 0
 STEAM_QUERY_URL = ''
 STEAM_QUERY_END = ''
-STEAM_LISTING = ''
+STEAM_LISTING   = ''
+EUROBOOL        = 1
+objects_list    = []
+iterator        = 0
 
 # Reads configuration file and sets some CONSTANTS. Sorry for shouting.
 def readConfig():
@@ -51,7 +54,6 @@ def displayUsage():
 # Turns our objects_list into a more useful one (and slightly bigger)
 def formalize_names():
     global objects_list
-
     new_table = []
 
     for sub in objects_list:
@@ -75,6 +77,9 @@ def formalize_names():
 
 # Herits from HTMLParser, because it's an HTML parser.
 class LinkExtractor(HTMLParser):
+    global objects_list
+    global iterator
+    global EUROBOOL
     pricef = 999
 
     def reset(self):
@@ -86,7 +91,8 @@ class LinkExtractor(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag == 'a':
             for name, value in attrs:
-                if name == 'href' and value == STEAM_LISTING + objects_list[iterator][1]:
+                #print "Len: " + str(len(objects_list)) + ", iterator: " + str(iterator)
+                if len(objects_list) > iterator and name == 'href' and value == STEAM_LISTING + objects_list[iterator][1]:
                     self.extracting = True
 
     # Action inside two tags
@@ -114,9 +120,11 @@ class LinkExtractor(HTMLParser):
             self.extracting = False
 
 # main function, sorry for the mess
-if __name__ == '__main__':
-    objects_list = [] # Contains every object the user inputed.
-    EUROBOOL = 1 # Euro/Dollar modifier.
+#if __name__ == '__main__':
+def main():
+    global objects_list #= [] # Contains every object the user inputed.
+    global iterator
+    global EUROBOOL #= 1 # Euro/Dollar modifier.
 
     readConfig() # Reads the configuration file and sets some constants.
         # You shouldn't really modify this file, by the way.
@@ -165,3 +173,5 @@ if __name__ == '__main__':
             le.feed(render['results_html'])
             iterator += 1
         sleep(TIME_INTERVAL)
+
+main()
