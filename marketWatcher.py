@@ -4,6 +4,9 @@ import urllib2
 from time import sleep
 from HTMLParser import HTMLParser
 
+import warnings
+warnings.filterwarnings("ignore")
+
 TIME_INTERVAL   = 0
 STEAM_QUERY_URL = ''
 STEAM_QUERY_END = ''
@@ -52,6 +55,9 @@ def displayUsage():
     print '    -e : allows you to enter a price in euros.'
     exit()
 
+def capitalize(line):
+    return ' '.join([s[0].upper() + s[1:] for s in line.split(' ')])
+
 # Turns our objects_list into a more useful one (and slightly bigger)
 def formalize_names():
     global objects_list
@@ -62,8 +68,9 @@ def formalize_names():
             print "Second argument must be a price, thus a number. Wrong parameter:" + sub[1]
             exit()
 
-        object_name = sub[0].lower()
-        object_name_titled = object_name.title()
+        object_name = sub[0]#.lower()
+        #object_name_titled = object_name.title()
+        object_name_titled = capitalize(object_name)
         object_name_titled = object_name_titled.replace(" Of ", " of ")
         object_name_titled = object_name_titled.replace(" The ", " the ")
         object_name_display = object_name_titled
@@ -93,7 +100,8 @@ class LinkExtractor(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag == 'a':
             for name, value in attrs:
-                if len(objects_list) > iterator and name == 'href' and value == STEAM_LISTING + objects_list[iterator][1]:
+                print str(iterator) + " should be < " + str(len(objects_list))
+                if iterator < len(objects_list) and name == 'href' and value == STEAM_LISTING + objects_list[iterator][1]:
                     found = True
                     self.extracting = True
 
@@ -122,7 +130,6 @@ class LinkExtractor(HTMLParser):
             self.extracting = False
 
 # main function, sorry for the mess
-#if __name__ == '__main__':
 def main():
     global objects_list #= [] # Contains every object the user inputed.
     global iterator
@@ -172,12 +179,16 @@ def main():
     # Big loop of doom.
     while True:
         iterator = 0
+        if len(objects_list) == 0:
+          exit()
         for render in renders_list:
             found = False
             le.feed(render['results_html'])
             if not found:
                 print "Object not found: " + objects_list[iterator][2]
+                print " --> Associated url: " + objects_list[iterator][1]
                 objects_list.remove(objects_list[iterator])
+                iterator -= 1
             iterator += 1
         sleep(TIME_INTERVAL)
 
