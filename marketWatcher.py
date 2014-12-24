@@ -11,6 +11,7 @@ STEAM_LISTING   = ''
 EUROBOOL        = 1
 objects_list    = []
 iterator        = 0
+found           = False
 
 # Reads configuration file and sets some CONSTANTS. Sorry for shouting.
 def readConfig():
@@ -80,6 +81,7 @@ class LinkExtractor(HTMLParser):
     global objects_list
     global iterator
     global EUROBOOL
+    global found
     pricef = 999
 
     def reset(self):
@@ -91,8 +93,8 @@ class LinkExtractor(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag == 'a':
             for name, value in attrs:
-                #print "Len: " + str(len(objects_list)) + ", iterator: " + str(iterator)
                 if len(objects_list) > iterator and name == 'href' and value == STEAM_LISTING + objects_list[iterator][1]:
+                    found = True
                     self.extracting = True
 
     # Action inside two tags
@@ -125,6 +127,7 @@ def main():
     global objects_list #= [] # Contains every object the user inputed.
     global iterator
     global EUROBOOL #= 1 # Euro/Dollar modifier.
+    global found
 
     readConfig() # Reads the configuration file and sets some constants.
         # You shouldn't really modify this file, by the way.
@@ -170,7 +173,11 @@ def main():
     while True:
         iterator = 0
         for render in renders_list:
+            found = False
             le.feed(render['results_html'])
+            if not found:
+                print "Object not found: " + objects_list[iterator][2]
+                objects_list.remove(objects_list[iterator])
             iterator += 1
         sleep(TIME_INTERVAL)
 
