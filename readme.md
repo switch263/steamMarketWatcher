@@ -21,13 +21,14 @@ Then you can use the script as specified in the usage below.
 
 #Usage:
 
-    python ./marketWatcher --help | [-f path | item_name price] [-e]
+    python ./marketWatcher --help | [-f path | item_name price] [-e] [-r]
 
         --help : displays this message.
         -f : reads the input into the file at path.
              File syntax : "object_name" price [newline]
              Your file can have as many lines as you'd like.
         -e : allows you to enter a price in euros.
+        -r : allows you to perform the search in reverse, to check prices going up.
         
 Example file syntax:
 
