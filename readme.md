@@ -22,3 +22,9 @@ Example file syntax:
 Using upper or lower-case letters will not change anything.
 
 Feel free to contact me about anything, you can use this script any way you like, and modify it.
+
+#In case of any issue
+
+Open an issue on github or shoot me an email at baruss.thomas@gmail.com
+
+Hope this script serves you well!
