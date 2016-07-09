@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import json
 import urllib2
@@ -13,6 +15,8 @@ STEAM_QUERY_END = ''
 STEAM_LISTING   = ''
 EUROBOOL        = 1
 objects_list    = []
+renders_list	= []
+foundList	= []
 iterator        = 0
 found           = False
 
@@ -69,13 +73,20 @@ def formalize_names():
             exit()
 
         object_name = sub[0]#.lower()
-        #object_name_titled = object_name.title()
         object_name_titled = capitalize(object_name)
         object_name_titled = object_name_titled.replace(" Of ", " of ")
         object_name_titled = object_name_titled.replace(" The ", " the ")
         object_name_display = object_name_titled
         object_name_titled = object_name_titled.replace(' ', '%20')
+        object_name_titled = object_name_titled.replace('(', '%28')
+        object_name_titled = object_name_titled.replace(')', '%29')
+        object_name_titled = object_name_titled.replace('™', '%E2%84%A2')
+        object_name_titled = object_name_titled.replace('|', '%7C')
         object_name = object_name.replace(' ', '%20')
+        object_name = object_name.replace('(', '%28')
+        object_name = object_name.replace(')', '%29')
+        object_name = object_name.replace('™', '%E2%84%A2')
+        object_name = object_name.replace('|', '%7C')
 
         object_price = sub[1]
 
@@ -83,61 +94,74 @@ def formalize_names():
 
     objects_list = new_table
 
-# Herits from HTMLParser, because it's an HTML parser.
 class LinkExtractor(HTMLParser):
-    global objects_list
-    global iterator
-    global EUROBOOL
-    global found
     pricef = 999
 
     def reset(self):
         HTMLParser.reset(self)
         self.extracting = False
-        self.links = []
 
     # Action at the beginning of a tag
     def handle_starttag(self, tag, attrs):
-        if tag == 'a':
+        if tag == 'a' and not found:
             for name, value in attrs:
-                print str(iterator) + " should be < " + str(len(objects_list))
-                if iterator < len(objects_list) and name == 'href' and value == STEAM_LISTING + objects_list[iterator][1]:
-                    found = True
+		test = STEAM_LISTING + objects_list[iterator][1]
+		value = value.split('/')
+		if (len(value) > 5):
+		    value.pop(5)
+		value = '/'.join(value)
+                if iterator in range(len(objects_list)) and name == 'href' \
+		and value == test:
                     self.extracting = True
 
     # Action inside two tags
     def handle_data(self, data):
-        global iterator
-        if self.extracting:
+        global iterator, found, objects_list, renders_list
+
+        if self.extracting and not found:
             if data[-3:] == 'USD':
-                pricef = float(data[:-4])
+	    	# Get rid of symbols in the price tag
+	    	if (data[0] == '$'):
+                    pricef = float(data[1:-4])
+		else:
+		    pricef = float(data[:-4])
+
                 if pricef < float(objects_list[iterator][3]) * EUROBOOL:
-                    print objects_list[iterator][2] + ":"
+                    print "- " + objects_list[iterator][2] + ":"
                     if (EUROBOOL == 1):
-                        print "Found a good price :", pricef, "USD", "\a"
+                        print "/!\\ FOUND A GOOD PRICE :", pricef, "USD /!\\\n", "\a"
                     else:
-                        print "Found a good price :", pricef / EUROBOOL, "Euros", "\a"
+                        print "/!\\ FOUND A GOOD PRICE :", pricef / EUROBOOL, " Euros /!\\\n", "\a"
 
                     if len(objects_list) == 1:
                         exit()
                     else:
-                        objects_list.remove(objects_list[iterator])
-                        iterator -= 1
+		        self.extracting = False
+			found = True
+		else:
+		    print "- " + objects_list[iterator][2] + ":"
+		    if (EUROBOOL == 1):
+		        print "Found a bad price: " + str(pricef) + "USD\n"
+		    else:
+		        print "Found a bad price: " + str(pricef / EUROBOOL) + " Euros\n"
+		    self.extracting = False
 
     # Action at the end of a tag
     def handle_endtag(self, tag):
-        if tag == 'a':
+        if tag == 'a' and found:
             self.extracting = False
 
 # main function, sorry for the mess
 def main():
-    global objects_list #= [] # Contains every object the user inputed.
+    global objects_list, foundList
     global iterator
-    global EUROBOOL #= 1 # Euro/Dollar modifier.
+    global EUROBOOL
     global found
 
     readConfig() # Reads the configuration file and sets some constants.
         # You shouldn't really modify this file, by the way.
+	# Except if nothing is working because steam changed some urls!
+	# But in that case the script might need a major overhaul anyway.
 
     # Basic command line arguments parsing.
     if '--help' in sys.argv:
@@ -153,43 +177,69 @@ def main():
             # Hack to check if true number.
             if not sys.argv[2].replace('.', '', 1).isdigit():
                 print "Second argument must be a price, thus a number. Wrong parameter: " + sys.argv[2]
-                exit()
+		displayUsage()
 
             objects_list = [[sys.argv[1], sys.argv[2]]]
         else:
             displayUsage()
 
-    if '-e' in sys.argv:
-        EUROBOOL = 1.36
+    if '-e' in sys.argv: # Update me from time to time! :> Could get it from web but lazy
+        EUROBOOL = 1.11
+
+    print "/!\ DISCLAIMER: Know that the number of requests you can send to the steam\n\
+market is limited. At some point, you will get a 429 HTTP error, which\n\
+means that Steam won't answer you anymore. I don't know how long it takes\n\
+for Steam to allow requests for you again. This is why the default timestep\n\
+is 2 minutes : so that you don't get timed out too quickly.\n"
 
     # Turns the objects list into a more useful objects list.
     formalize_names()
-
-    # One render per object, it's page-related.
-    renders_list = []
 
     for sub in objects_list:
         page = urllib2.urlopen(STEAM_QUERY_URL + sub[0] + STEAM_QUERY_END).read()
         render = json.loads(page)
         renders_list.append(render)
 
+    for render in renders_list:
+        foundList.append(False)
+
     # Instantiates the HTML parser...
     le = LinkExtractor()
 
-    # Big loop of doom.
+    # Main loop
     while True:
+    	for i in range(len(objects_list)):
+	    foundList[i] = False
         iterator = 0
+
+	for render in renders_list:
+	    found = False
+	    le.feed(render['results_html'])
+	    if found and iterator in range(len(foundList)):
+	    	foundList[iterator] = True
+	    iterator = iterator + 1
+
+	# Remove found items.
+	mod = 0
+	for i in range(len(foundList)):
+	    if foundList[i - mod]:
+	        renders_list.pop(i - mod)
+		objects_list.pop(i - mod)
+		mod += 1
+	foundList = [v for v in foundList if not v]
+
         if len(objects_list) == 0:
-          exit()
-        for render in renders_list:
-            found = False
-            le.feed(render['results_html'])
-            if not found:
-                print "Object not found: " + objects_list[iterator][2]
-                print " --> Associated url: " + objects_list[iterator][1]
-                objects_list.remove(objects_list[iterator])
-                iterator -= 1
-            iterator += 1
-        sleep(TIME_INTERVAL)
+	    print "==== Succesfully found all the items! :) ===="
+            exit()
+
+	print "\nScript is going to keep looking for :"
+	for e in objects_list:
+	    print "\t* " + e[2]
+	
+	print
+	for s in range(TIME_INTERVAL):
+	    sys.stdout.write("\rSleeping for " + str(TIME_INTERVAL - s) + " seconds...")
+	    sleep(1)
+        #sleep(TIME_INTERVAL)
 
 main()

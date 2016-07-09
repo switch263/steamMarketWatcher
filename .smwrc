@@ -1,4 +1,4 @@
-time_interval=5
+time_interval=120
 steam_query_url=http://steamcommunity.com/market/search/render/?query=
 steam_query_end=&start=0&count=10
-steam_listing=http://steamcommunity.com/market/listings/570/
+steam_listing=http://steamcommunity.com/market/listings/
