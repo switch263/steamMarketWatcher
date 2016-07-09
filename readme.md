@@ -38,6 +38,8 @@ Example file syntax:
     
 Using upper or lower-case letters will not change anything.
 
+By default the script updates once every 60 seconds. You can change this in the .smwrc file, by changing the value after `time_interval=`. Don't go too low because the steam market has a limit on the number of requests you can do. Too much requests, and you'll get a timeout (HTTP error 429). I wouldn't advise going below 15 seconds.
+
 Feel free to contact me about anything, you can use this script any way you like, and modify it.
 
 #In case of any issue
