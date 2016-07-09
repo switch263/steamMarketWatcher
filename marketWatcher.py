@@ -51,13 +51,14 @@ def readFile(path):
 
 # Displays the script's usage.
 def displayUsage():
-    print 'python ./marketWatcher --help | [-f path | item_name price] [-e]'
+    print 'python ./marketWatcher --help | [-f path | item_name price] [-e] [-r]'
     print
     print '    --help : displays this message.'
     print '    -f : reads the input into the file at path.'
     print '    File syntax : "object_name" price [newline]'
     print '    Your file can have as many lines as you\'d like.'
     print '    -e : allows you to enter a price in euros.'
+    print '    -r : allows you to perform the search in reverse, to check prices going up.'
     exit()
 
 def capitalize(line):
