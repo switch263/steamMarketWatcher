@@ -13,7 +13,7 @@ Steam Market Watcher is a little Python script that allows you to check at const
 
 Download the requirement above, install it.
 
-Download the git repository (this project), go into the corresponding folder, press shift + right click -> Open command window here.
+Download the git repository (this project, « Clone or download » green button, top right corner), go into the corresponding folder, press shift + right click -> Open command window here.
 
 If this option isn't available for some reason, press Win+R, type `cmd`, then navigate to the folder. Example if you want to go to D:\Documents\steamMarketWatcher : http://i.imgur.com/9moUMbP.png
 
