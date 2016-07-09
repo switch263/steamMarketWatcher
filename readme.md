@@ -49,6 +49,7 @@ Hope this script serves you well!
 #Possible issues
 
 * Unicode characters that I don't handle. This will probably happen so tell me asap, should be a quick fix.
+* Steam changing the market's structure. Since the crawling is based on hard-coded URLs, this could be broken in an instant if Steam decides to update their URLs.
 
 If the item isn't found, make the search yourself on https://steamcommunity.com/market/ and look if
 you didn't mistype something or if the item's associated url is a bit funky. Then tell me if you can't
