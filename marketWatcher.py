@@ -19,6 +19,7 @@ renders_list	= []
 foundList	= []
 iterator        = 0
 found           = False
+reverse		= False
 
 # Reads configuration file and sets some CONSTANTS. Sorry for shouting.
 def readConfig():
@@ -126,25 +127,55 @@ class LinkExtractor(HTMLParser):
 		else:
 		    pricef = float(data[:-4])
 
-                if pricef < float(objects_list[iterator][3]) * EUROBOOL:
-                    print "- " + objects_list[iterator][2] + ":"
-                    if (EUROBOOL == 1):
-                        print "/!\\ FOUND A GOOD PRICE :", pricef, "USD /!\\\n", "\a"
-                    else:
-                        print "/!\\ FOUND A GOOD PRICE :", pricef / EUROBOOL, " Euros /!\\\n", "\a"
+		if not reverse:
+		    if pricef < float(objects_list[iterator][3]) * EUROBOOL:
+		        print "- " + objects_list[iterator][2] + ":"
+		        if (EUROBOOL == 1):
+			    print "================================================"
+		    	    print "/!\\ FOUND A GOOD PRICE :", pricef, "USD /!\\\n", "\a"
+			    print "================================================"
+		        else:
+			    print "================================================"
+		    	    print "/!\\ FOUND A GOOD PRICE :", pricef / EUROBOOL, " Euros /!\\\n", "\a"
+			    print "================================================"
 
-                    if len(objects_list) == 1:
-                        exit()
-                    else:
-		        self.extracting = False
-			found = True
-		else:
-		    print "- " + objects_list[iterator][2] + ":"
-		    if (EUROBOOL == 1):
-		        print "Found a bad price: " + str(pricef) + "USD\n"
+		        if len(objects_list) == 1:
+		    	    exit()
+		        else:
+		    	    self.extracting = False
+		    	    found = True
 		    else:
-		        print "Found a bad price: " + str(pricef / EUROBOOL) + " Euros\n"
-		    self.extracting = False
+		        print "- " + objects_list[iterator][2] + ":"
+		        if (EUROBOOL == 1):
+		    	    print "Found a bad price: " + str(pricef) + "USD\n"
+		        else:
+		    	    print "Found a bad price: " + str(pricef / EUROBOOL) + " Euros\n"
+		            self.extracting = False
+		else:
+		    if pricef > float(objects_list[iterator][3]) * EUROBOOL:
+		        print "- " + objects_list[iterator][2] + ":"
+		        if (EUROBOOL == 1):
+			    print "================================================"
+		    	    print "/!\\ HIGHER THAN SPECIFIED: ", pricef, "USD /!\\\n", "\a"
+			    print "================================================"
+		        else:
+			    print "================================================"
+		    	    print "/!\\ HIGHER THAN SPECIFIED: ", pricef / EUROBOOL, " Euros /!\\\n", "\a"
+			    print "================================================"
+
+		        if len(objects_list) == 1:
+		    	    exit()
+		        else:
+		    	    self.extracting = False
+		    	    found = True
+		    else:
+		        print "- " + objects_list[iterator][2] + ":"
+		        if (EUROBOOL == 1):
+		    	    print "Still lower than specified: " + str(pricef) + "USD\n"
+		        else:
+		    	    print "Still lower than specified: " + str(pricef / EUROBOOL) + " Euros\n"
+		            self.extracting = False
+		    
 
     # Action at the end of a tag
     def handle_endtag(self, tag):
@@ -153,10 +184,7 @@ class LinkExtractor(HTMLParser):
 
 # main function, sorry for the mess
 def main():
-    global objects_list, foundList
-    global iterator
-    global EUROBOOL
-    global found
+    global objects_list, foundList, iterator, EUROBOOL, found, reverse
 
     readConfig() # Reads the configuration file and sets some constants.
         # You shouldn't really modify this file, by the way.
@@ -167,13 +195,18 @@ def main():
     if '--help' in sys.argv:
         displayUsage()
 
+    if '-r' in sys.argv:
+        reverse = True
+
     if '-f' in sys.argv:
-        if (len(sys.argv) == 3) or (len(sys.argv) == 4 and '-e' in sys.argv):
+        if (len(sys.argv) >= 3):
+	    print "Trying to read specified config file: " + sys.argv[2] + "..."
             readFile(sys.argv[2])
+	    print "Success!"
         else:
             displayUsage()
     else:
-        if (len(sys.argv) == 3) or (len(sys.argv) == 4 and '-e' in sys.argv):
+        if (len(sys.argv) >= 3):
             # Hack to check if true number.
             if not sys.argv[2].replace('.', '', 1).isdigit():
                 print "Second argument must be a price, thus a number. Wrong parameter: " + sys.argv[2]
@@ -222,7 +255,7 @@ is 2 minutes : so that you don't get timed out too quickly.\n"
 	# Remove found items.
 	mod = 0
 	for i in range(len(foundList)):
-	    if foundList[i - mod]:
+	    if foundList[i]:
 	        renders_list.pop(i - mod)
 		objects_list.pop(i - mod)
 		mod += 1
